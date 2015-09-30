@@ -2,7 +2,25 @@
 
 A program for managing your music score collection. It runs on Linux and is written for the holy command line.
 
+## Installation
+
+To install it clone the repository or download a release form the release page and run (after extracting it):
+
+```
+sudo make install
+```
+
+Your database is stored in `~/.scorelib/scorelib.db`
+
+To remove scorelib run:
+
+```
+sudo make uninstall
+```
+
 ## Usage
+
+When you first use the program, you have to initialize it. To do so start the program and enter `init` as a command.
 
 There are two different modes: the normal mode and the edit mode. When you start the program you start out in the normal mode with the prompt ` > ` and you can run the following commands:
 
