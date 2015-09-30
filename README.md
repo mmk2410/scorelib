@@ -4,6 +4,8 @@ A program for managing your music score collection. It runs on Linux and is writ
 
 ## Installation
 
+Python 3 is required for using this program.
+
 To install it clone the repository or download a release form the release page and run (after extracting it):
 
 ```
