@@ -1,18 +1,29 @@
 #!/usr/bin/env python3
-"""Scorelib - A score library management programm"""
+
+"""
+Scorelib - A score library management programm
+Marcel Kapfer (mmk2410)
+MIT License
+Version 0.1.1
+"""
+
 import sqlite3
 import readline
 import getpass
 import os
 
-user = getpass.getuser()
-dbdir = "/home/" + user + "/.scorelib/"
-dbpath = dbdir + "scorelib.db"
+USER = getpass.getuser()
+CONFIG = "/home/" + USER + "/.scorelib/"
+DBPATH = CONFIG + "scorelib.db"
 
 class Piece:
     """ A class for working with scores """
 
-    def __init__(self, piece):
+    def __init__(self, piece=None):
+        if piece is None:
+            raise NameError("No piece list given")
+        if piece['id'] is None:
+            raise NameError("No piece id given")
         self.pieceid = piece['id']
         self.name = piece['name']
         self.composer = piece['composer']
@@ -42,7 +53,7 @@ Book:       {}
         """
         con = None
         try:
-            con = sqlite3.connect(dbpath)
+            con = sqlite3.connect(DBPATH)
             cur = con.cursor()
             sqlcmd = "DELETE FROM Scores WHERE id = " + str(self.pieceid)
             cur.execute(sqlcmd)
@@ -65,7 +76,7 @@ Book:       {}
         self.key = rlinput("Key: ", self.key)
         self.book = rlinput("Book: ", self.book)
         # Pushing changes to the database
-        con = sqlite3.connect(dbpath)
+        con = sqlite3.connect(DBPATH)
         print(self.get_list)
         with con:
             cur = con.cursor()
@@ -89,12 +100,12 @@ def initialize():
 
     print("Initializing the database...")
 
-    os.mkdir(dbdir, 0o755)
+    os.mkdir(CONFIG, 0o755)
 
     con = None
 
     try:
-        con = sqlite3.connect(dbpath)
+        con = sqlite3.connect(DBPATH)
 
         cur = con.cursor()
 
@@ -116,6 +127,8 @@ def initialize():
         if con:
             con.close()
 
+    return 0
+
 def destroy():
     """
     Destroys the table.
@@ -125,7 +138,7 @@ def destroy():
     con = None
 
     try:
-        con = sqlite3.connect(dbpath)
+        con = sqlite3.connect(DBPATH)
 
         cur = con.cursor()
 
@@ -138,6 +151,8 @@ def destroy():
     finally:
         if con:
             con.close()
+
+    return 0
 
 def add():
     """ Add a entry to the database """
@@ -153,14 +168,18 @@ def add():
     piece['key'] = input("Key: ")
     piece['book'] = input("Book: ")
 
-    newPiece = Piece(piece)
+    try:
+        new_piece = Piece(piece)
+    except NameError as err:
+        print("Error: %s" % err.args[0])
+        return -1
 
-    newPiece.print_piece()
+    new_piece.print_piece()
 
     con = None
 
     try:
-        con = sqlite3.connect(dbpath)
+        con = sqlite3.connect(DBPATH)
 
         cur = con.cursor()
 
@@ -183,6 +202,8 @@ def add():
         if con:
             con.close()
 
+    return 0
+
 def list_scores():
     """
     List all available scores
@@ -192,7 +213,7 @@ def list_scores():
 
     try:
 
-        con = sqlite3.connect(dbpath)
+        con = sqlite3.connect(DBPATH)
 
         cur = con.cursor()
 
@@ -204,7 +225,7 @@ def list_scores():
 
             row = cur.fetchone()
 
-            if row == None:
+            if row is None:
                 break
 
             print(
@@ -221,35 +242,41 @@ Book:           {}
 
     except sqlite3.Error as err:
         print("Error: %s" % err.args[0])
+        return 1
 
     finally:
         if con:
             con.close()
 
+    return 0
 
-def edit():
-    """
-        Function for editing the pieces
-    """
+def edit_get_id():
+    """ Get the piece id from the user"""
     pieceid = None
-    # Ask piece id from user
     while True:
         pieceid = input("Enter the piece number: ")
         if pieceid == 'quit':
             return 0
         elif pieceid and pieceid.isdigit():
-            con = sqlite3.connect(dbpath)
+            con = sqlite3.connect(DBPATH)
             piecerow = None
             with con:
                 cur = con.cursor()
                 cur.execute("SELECT * FROM Scores WHERE Id=" + str(pieceid))
                 piecerow = cur.fetchone()
-            if piecerow == None:
+            if piecerow is None:
                 print("No Piece with this number available.")
             else:
                 break
         else:
-            print("Input must be a number!")
+            print("Input must be a valid number!")
+        return piecerow
+
+
+def edit():
+    """Function for editing the pieces"""
+    # Ask piece id from user
+    piecerow = edit_get_id()
 
     # Getting the piece information
     piecedata = {"id": piecerow[0], "name": piecerow[1], "composer": piecerow[2],\
@@ -262,7 +289,7 @@ def edit():
     while True:
         edtcmd = input(" (edit) > ")
         if edtcmd in ['help', '?', 'usage']:
-            helpedittext(False)
+            helpedittext()
         elif edtcmd in ['done', 'q']:
             return 0
         elif edtcmd in ['print', 'p']:
@@ -278,24 +305,24 @@ def edit():
 def search():
     """ Search through the database """
     term = input("Search for: ")
-    con = sqlite3.connect(dbpath)
+    con = sqlite3.connect(DBPATH)
     with con:
         cur = con.cursor()
         cur.execute("SELECT * FROM Scores")
         rows = cur.fetchall()
-        for x in range(1,6):
-            if x == 1:
+        for item in range(1, 6):
+            if item == 1:
                 print("By name\n")
-            elif x == 2:
+            elif item == 2:
                 print("By Composer\n")
-            elif x == 3:
+            elif item == 3:
                 print("By Opus\n")
-            elif x == 4:
+            elif item == 4:
                 print("By Key\n")
-            elif x == 5:
+            elif item == 5:
                 print("By Book\n")
             for row in rows:
-                if term in row[x]:
+                if term in row[item]:
                     piecedata = {"id": row[0], "name": row[1], "composer": row[2],\
                     "opus": row[3], "key": row[4], "book": row[5]}
                     piece = Piece(piecedata)
@@ -303,8 +330,7 @@ def search():
                     piece.print_piece()
 
 
-
-def helpedittext(doneshit):
+def helpedittext(doneshit=False):
     """ print the edit help text """
     if doneshit:
         print("The entered command ist not available.")
@@ -320,13 +346,13 @@ edit, change, c, e          Change the values of the item
         """
     )
 
-def helptext(doneshit):
+def helptext(doneshit=False):
     """ print the help text """
     if doneshit:
         print("The entered command is not available.")
     print(
         """
-Scorelib v0.1.0
+Scorelib v0.1.1
 A program for managing your music score collection
 
 Author:
@@ -349,31 +375,42 @@ quit, exit, x, q            close Scorelib
         """
     )
 
-print(
-    """
+
+def main():
+    """ Main """
+    print(
+        """
 Welcome to Scorelib -  A program for managing your music score collection
 
 If you use this program the first time you have to initialize the database \
-before you can use it.
+        before you can use it.
 
 Type 'help' to see a list of commands
-   """
-)
+    """
+    )
 
-while True:
-    cmd = input(" > ")
+    while True:
+        cmd = input(" > ")
 
     if cmd in ['usage', 'help', '?']:
-        helptext(False)
+        helptext()
     elif cmd in ['quit', 'exit', 'x', 'q']:
         print("Good Bye!")
         exit(0)
     elif cmd == 'init':
-        initialize()
+        status = initialize()
+        if status == 1:
+            print("A database error occurred. Please try again.")
     elif cmd == 'kill':
-        destroy()
+        status = destroy()
+        if status == 1:
+            print("A database error occurred. Please try again.")
     elif cmd in ['add', 'new', 'a']:
-        add()
+        status = add()
+        if status == 1:
+            print("A database error occurred. Please try again.")
+        elif status == -1:
+            print("An input you made was not accepted.")
     elif cmd in ['list', 'l']:
         list_scores()
     elif cmd in ['edit', 'e']:
@@ -382,3 +419,6 @@ while True:
         search()
     else:
         helptext(True)
+
+if __name__ == "__main__":
+    main()
