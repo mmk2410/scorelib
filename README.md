@@ -1,10 +1,10 @@
 # Scorelib
 
-A program for managing your music score collection. It runs on Linux and is written for the holy command line.
+A free program for managing your music score collection. It runs on Linux and is written for the holy command line.
 
 ## Installation
 
-Python 3 is required for using this program.
+Python 3 and sqlite3 is required for using this program.
 
 To install it clone the repository or download a release form the release page and run (after extracting it):
 
@@ -49,7 +49,7 @@ If you switch to the editing mode your prompt will look like this: ` (edit) > ` 
 
 ## Contributing
 
-The program is licensed under MIT license. If you want to contribute just follow these steps:
+The program is licensed under GPL v3 license. If you want to contribute just follow these steps:
 
  1. Fork it
  2. Create your feature branch (`git chechout -b my-new-feature`)
