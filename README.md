@@ -59,8 +59,6 @@ The program is licensed under GPL v3 license. If you want to contribute just fol
 
 You can also add yourself to the CONTRIBUTORS.md file. (Create it if it doesn't exist)
 
-## Social
+## News
 
-Twitter: [@mmk2410](https://twitter.com/mmk2410)
-
-Google+: [+MarcelMichaelKapfer](https://plus.google.com/+MarcelMichaelKapfer)
+If there any news, I'll write about them on Twitter ([@mmk2410](https://twitter.com/mmk2410)) and on my blog at [mmk2410.org](https://mmk2410.org).
